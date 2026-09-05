@@ -1,3 +1,6 @@
 cooking-app-conversation-summary.md
 .venv/
 __pycache__/
+.neon
+.env.local
+node_modules/
