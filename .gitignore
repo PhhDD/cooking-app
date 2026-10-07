@@ -4,3 +4,11 @@ __pycache__/
 .neon
 .env.local
 node_modules/
+.env
+.env.*
+*.py[cod]
+.ruff_cache/
+
+dist/
+build/
+*.egg-info/
