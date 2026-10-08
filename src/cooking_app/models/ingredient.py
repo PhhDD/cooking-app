@@ -25,6 +25,7 @@ class IngredientCategory(str, Enum):
     HERB_SPICE  = "herb_spice"
     OIL_FAT     = "oil_fat"
     SAUCE_CONDIMENT = "sauce_condiment"
+    PROTEIN     = "protein"
     OTHER       = "other"
 
 

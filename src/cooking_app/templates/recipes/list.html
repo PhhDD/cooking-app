@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Your Space{% endblock %}
+
+{% block content %}
+<section class="page-heading">
+    <h1>Recipes</h1>
+    <p>Keep your favourite dishes all in one place~</p>
+</section>
+
+<section class="recipe-list">
+    {% if recipes %}
+        {% for recipe in recipes %}
+            <article class="recipe-card">
+                <h2>
+                    <a href="/recipes/{{ recipe.id }}">
+                        {{ recipe.recipe_name }}
+                    </a>
+                </h2>
+
+                {% if recipe.cuisine %}
+                    <p class="recipe-cuisine">
+                        {{ recipe.cuisine }}
+                    </p>
+                {% endif %}
+
+                <dl>
+                    <div>
+                        <dt>Cooking time</dt>
+                        <dd>{{ recipe.cook_time }} minutes</dd>
+                    </div>
+
+                    <div>
+                        <dt>Servings</dt>
+                        <dd>{{ recipe.servings }}</dd>
+                    </div>
+                </dl>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>You do not have any recipes yet.</p>
+    {% endif %}
+
+    <a
+        href="/recipes/new"
+        class="recipe-card add-recipe-card"
+        aria-label="Add a new recipe"
+    >
+        <span class="add-recipe-plus">+</span>
+    </a>
+</section>
+{% endblock %}
