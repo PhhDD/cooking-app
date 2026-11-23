@@ -1,14 +1,10 @@
 from decimal import Decimal
 from uuid import UUID as UUID_Python
-from uuid6 import uuid7
 
-from sqlalchemy import ForeignKey
-from sqlalchemy import Numeric
-from sqlalchemy import String
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import ForeignKey, Numeric, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+from uuid6 import uuid7
 
 from cooking_app.database import Base
 

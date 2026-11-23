@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Access Denied · Cooking App{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <p class="eyebrow">403 ERROR</p>
+    <h1>This recipe is not yours to edit.</h1>
+    <p>
+        You can only modify recipes in your own Vault.
+    </p>
+
+    <a href="/recipes" class="error-page-link">
+        Back to recipes
+    </a>
+</section>
+{% endblock %}

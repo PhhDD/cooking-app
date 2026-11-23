@@ -1,16 +1,12 @@
 from datetime import datetime
 from enum import Enum
 from uuid import UUID as UUID_Python
-from uuid6 import uuid7
 
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import UniqueConstraint
-from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
-from sqlalchemy import Text
+from sqlalchemy import ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+from uuid6 import uuid7
 
 from cooking_app.database import Base
 

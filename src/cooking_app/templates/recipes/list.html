@@ -2,10 +2,51 @@
 
 {% block title %}Your Space{% endblock %}
 
+{% block header_search %}
+<form
+    action="{{ search_action | default('/recipes') }}"
+    method="get"
+    class="header-search"
+>
+    <input
+        id="recipe-search"
+        name="q"
+        type="search"
+        value="{{ query }}"
+        placeholder="Search recipes, ingredients, cuisine..."
+    >
+
+    <button type="submit">
+        Search
+    </button>
+</form>
+{% endblock %}
+
+{% block collection_navigation %}
+<nav class="recipe-tabs" aria-label="Recipe collections">
+    <a
+        href="/recipes"
+        class="recipe-tab {% if active_tab == 'public' %}active{% endif %}"
+    >
+        Public
+    </a>
+
+    {% if is_authenticated %}
+        <a
+            href="/vault"
+            class="recipe-tab {% if active_tab == 'vault' %}active{% endif %}"
+        >
+            Vault
+        </a>
+    {% endif %}
+</nav>
+{% endblock %}
+
 {% block content %}
 <section class="page-heading">
-    <h1>Recipes</h1>
-    <p>Keep your favourite dishes all in one place~</p>
+    <p>
+        {{ page_description | default("Keep your favourite dishes all in one place~") }}
+    </p>
 </section>
 
 <section class="recipe-list">
@@ -17,6 +58,12 @@
                         {{ recipe.recipe_name }}
                     </a>
                 </h2>
+
+                {% if is_admin and recipe.is_public %}
+                    <p class="recipe-visibility">
+                        Admin-owned public recipe
+                    </p>
+                {% endif %}
 
                 {% if recipe.cuisine %}
                     <p class="recipe-cuisine">
@@ -38,15 +85,21 @@
             </article>
         {% endfor %}
     {% else %}
-        <p>You do not have any recipes yet.</p>
+        {% if query %}
+            <p>No recipes matched "{{ query }}".</p>
+        {% else %}
+            <p>{{ empty_message | default("You do not have any recipes yet.") }}</p>
+        {% endif %}
     {% endif %}
 
-    <a
-        href="/recipes/new"
-        class="recipe-card add-recipe-card"
-        aria-label="Add a new recipe"
-    >
-        <span class="add-recipe-plus">+</span>
-    </a>
+    {% if is_authenticated %}
+        <a
+            href="/recipes/new"
+            class="recipe-card add-recipe-card"
+            aria-label="Add a new recipe"
+        >
+            <span class="add-recipe-plus">+</span>
+        </a>
+    {% endif %}
 </section>
 {% endblock %}

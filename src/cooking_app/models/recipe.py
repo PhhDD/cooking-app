@@ -1,14 +1,15 @@
-from cooking_app.database import Base
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
-from sqlalchemy import String
-from sqlalchemy import Integer
-from sqlalchemy.dialects.postgresql import UUID
-from uuid import UUID as UUID_Python
-from uuid6 import uuid7
 from datetime import datetime
 from enum import Enum
+from uuid import UUID as UUID_Python
+
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
+from uuid6 import uuid7
+
+from cooking_app.database import Base
+
 
 class SourceLang(str, Enum):
     ENGLISH = "en"
@@ -16,6 +17,13 @@ class SourceLang(str, Enum):
 
 class Recipe(Base):
     __tablename__ = "recipes"
+    __table_args__ = (
+        UniqueConstraint(
+            "owner_id",
+            "source_recipe_id",
+            name = "uq_recipe_owner_source",
+        ),
+    )
 
     id:             Mapped[UUID_Python] = mapped_column(
                                                     UUID(as_uuid=True),
@@ -37,4 +45,18 @@ class Recipe(Base):
     updated_at:     Mapped[datetime]    = mapped_column(
                                                     default=datetime.now,
                                                     onupdate=datetime.now,
+                                                    )
+    owner_id:       Mapped[UUID_Python | None] = mapped_column(
+                                                    UUID(as_uuid=True),
+                                                    ForeignKey("users.id"),
+                                                    nullable=True,
+                                                    )
+    source_recipe_id: Mapped[UUID_Python | None] = mapped_column(
+                                                    UUID(as_uuid=True),
+                                                    ForeignKey("recipes.id", ondelete="SET NULL"),
+                                                    nullable=True,
+                                                    )
+    is_public:      Mapped[bool]        = mapped_column(
+                                                    default=False,
+                                                    nullable=False,
                                                     )

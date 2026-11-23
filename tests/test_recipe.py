@@ -3,10 +3,10 @@ from sqlalchemy import select
 from cooking_app.database import SessionLocal
 from cooking_app.models.recipe import Recipe
 
-
 session = SessionLocal()
 
 recipe = Recipe(
+    recipe_name="Test Recipe",
     cook_time=1800,
     servings=2,
     cuisine="Chinese",

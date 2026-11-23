@@ -13,12 +13,22 @@
 </head>
 <body>
     <header class="site-header">
-        <a href="/recipes">Cooking App</a>
+        <a href="/recipes" class="site-brand">
+            Cooking App
+        </a>
 
-        <nav>
-            <a href="/recipes">Recipes</a>
+	{% block header_search %}{% endblock %}
+
+        <nav class="account-navigation" aria-label="Account navigation">
+            {% if is_authenticated %}
+                <a href="/sign-out">Sign out</a>
+            {% else %}
+                <a href="/sign-in">Sign in</a>
+            {% endif %}
         </nav>
     </header>
+
+    {% block collection_navigation %}{% endblock %}
 
     <main>
         {% block content %}{% endblock %}

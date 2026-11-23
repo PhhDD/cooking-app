@@ -3,71 +3,474 @@
 {% block title %}Edit {{ recipe.recipe_name }} · Cooking App{% endblock %}
 
 {% block content %}
-<section class="form-page">
-    <a href="/recipes/{{ recipe.id }}">← Back to recipe</a>
+<section class="edit-page">
 
-    <header class="page-heading">
-        <p class="eyebrow">EDIT RECIPE</p>
-        <h1>{{ recipe.recipe_name }}</h1>
+    <a href="/recipes/{{ recipe.id }}" class="back-link">
+        ← Back to recipe
+    </a>
+
+    <header class="edit-page-header">
+        <h1>
+            <span class="edit-heading-prefix">Edit Recipe ·</span>
+            {{ recipe.recipe_name }}
+        </h1>
+
+        <p>Update your recipe details, ingredients, and cooking steps.</p>
     </header>
 
-    <form
-        action="/recipes/{{ recipe.id }}/edit"
-        method="post"
-        class="recipe-form"
-    >
-        <label for="recipe_name">
-            Recipe name
-        </label>
+    <section class="edit-section">
+    <details class="edit-card recipe-details-card">
+        <summary class="edit-card-summary">
+            <span>
+                <strong>Recipe details</strong>
 
-        <input
-            id="recipe_name"
-            name="recipe_name"
-            type="text"
-            value="{{ recipe.recipe_name }}"
-            required
-        >
+                <small>
+                    {{ recipe.cuisine or "Cuisine not specified" }}
+                    · {{ recipe.cook_time }} minutes
+                    · {{ recipe.servings }} servings
+                </small>
+            </span>
 
-        <label for="cuisine">
-            Cuisine
-        </label>
+            <span class="edit-card-toggle">
+                Edit
+            </span>
+        </summary>
 
-        <input
-            id="cuisine"
-            name="cuisine"
-            type="text"
-            value="{{ recipe.cuisine or '' }}"
-        >
+        <div class="edit-card-body">
+            <form
+                action="/recipes/{{ recipe.id }}/edit"
+                method="post"
+                class="recipe-form"
+            >
+                <label for="recipe_name">
+                    Recipe name
+                </label>
 
-        <label for="cook_time">
-            Cooking time in minutes
-        </label>
+                <input
+                    id="recipe_name"
+                    name="recipe_name"
+                    type="text"
+                    value="{{ recipe.recipe_name }}"
+                    required
+                >
 
-        <input
-            id="cook_time"
-            name="cook_time"
-            type="number"
-            min="1"
-            value="{{ recipe.cook_time }}"
-            required
-        >
+                <label for="cuisine">
+                    Cuisine
+                </label>
 
-        <label for="servings">
-            Servings
-        </label>
+                <input
+                    id="cuisine"
+                    name="cuisine"
+                    type="text"
+                    value="{{ recipe.cuisine or '' }}"
+                >
 
-        <input
-            id="servings"
-            name="servings"
-            type="number"
-            min="1"
-            value="{{ recipe.servings }}"
-            required
-        >
+                <label for="cook_time">
+                    Cooking time in minutes
+                </label>
 
-        <button type="submit">
-            Save changes
-        </button>
-    </form>
+                <input
+                    id="cook_time"
+                    name="cook_time"
+                    type="number"
+                    min="1"
+                    value="{{ recipe.cook_time }}"
+                    required
+                >
+
+                <label for="servings">
+                    Servings
+                </label>
+
+                <input
+                    id="servings"
+                    name="servings"
+                    type="number"
+                    min="1"
+                    value="{{ recipe.servings }}"
+                    required
+                >
+
+                <button type="submit">
+                    Save recipe details
+                </button>
+            </form>
+        </div>
+    </details>
+</section>
+
+    <section id="ingredients" class="edit-section">
+        <div class="edit-section-heading">
+            <div>
+                <p class="eyebrow">WHAT YOU NEED</p>
+                <h2>Ingredients</h2>
+            </div>
+
+            <span class="edit-count">
+                {{ ingredient_rows | length }}
+            </span>
+        </div>
+
+        {% if ingredient_rows %}
+            <div class="edit-card-list">
+                {% for recipe_ingredient, ingredient in ingredient_rows %}
+                    <details
+                        id="ingredient-{{ recipe_ingredient.id }}"
+                        class="edit-card"
+                    >
+                        <summary class="edit-card-summary">
+                            <span>
+                                <strong>{{ ingredient.name }}</strong>
+                                <small>
+                                    {{ recipe_ingredient.quantity }}
+                                    {{ recipe_ingredient.unit }}
+                                    {% if recipe_ingredient.preparation %}
+                                        · {{ recipe_ingredient.preparation }}
+                                    {% endif %}
+                                </small>
+                            </span>
+
+                            <span class="edit-card-toggle">
+                                Edit
+                            </span>
+                        </summary>
+
+                        <div class="edit-card-body">
+                            <form
+                                action="/recipes/{{ recipe.id }}/ingredients/{{ recipe_ingredient.id }}/edit"
+                                method="post"
+                                class="compact-form"
+                            >
+                                <label>
+                                    Quantity
+
+                                    <input
+                                        name="quantity"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value="{{ recipe_ingredient.quantity }}"
+                                        required
+                                    >
+                                </label>
+
+                                <label>
+                                    Unit
+
+                                    <input
+                                        name="unit"
+                                        type="text"
+                                        value="{{ recipe_ingredient.unit }}"
+                                        required
+                                    >
+                                </label>
+
+                                <label>
+                                    Preparation
+
+                                    <input
+                                        name="preparation"
+                                        type="text"
+                                        value="{{ recipe_ingredient.preparation or '' }}"
+                                    >
+                                </label>
+
+                                <button type="submit">
+                                    Save ingredient
+                                </button>
+                            </form>
+
+                            <form
+                                action="/recipes/{{ recipe.id }}/ingredients/{{ recipe_ingredient.id }}/delete"
+                                method="post"
+                                class="delete-form"
+                                onsubmit="return confirm('Remove this ingredient from the recipe?');"
+                            >
+                                <button type="submit" class="danger-button">
+                                    Remove ingredient
+                                </button>
+                            </form>
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-edit-message">
+                No ingredients have been added yet.
+            </p>
+        {% endif %}
+
+        <details class="add-panel">
+            <summary>
+                <span>+</span>
+                Add ingredient
+            </summary>
+
+            <form
+                action="/recipes/{{ recipe.id }}/ingredients"
+                method="post"
+                class="recipe-form"
+            >
+                <label for="ingredient_name">
+                    Ingredient name
+                </label>
+
+                <input
+                    id="ingredient_name"
+                    name="ingredient_name"
+                    type="text"
+                    required
+                >
+
+                <label for="category">
+                    Category
+                </label>
+
+                <select id="category" name="category" required>
+                    <option value="">Choose a category</option>
+
+                    {% for category in categories %}
+                        <option value="{{ category.value }}">
+                            {{ category.value.replace("_", " ").title() }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <label for="quantity">
+                    Quantity
+                </label>
+
+                <input
+                    id="quantity"
+                    name="quantity"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                >
+
+                <label for="unit">
+                    Unit
+                </label>
+
+                <input
+                    id="unit"
+                    name="unit"
+                    type="text"
+                    required
+                >
+
+                <label for="preparation">
+                    Preparation
+                </label>
+
+                <input
+                    id="preparation"
+                    name="preparation"
+                    type="text"
+                >
+
+                <button type="submit">
+                    Add ingredient
+                </button>
+            </form>
+        </details>
+    </section>
+
+    <section id="steps" class="edit-section">
+        <div class="edit-section-heading">
+            <div>
+                <p class="eyebrow">HOW TO COOK IT</p>
+                <h2>Cooking steps</h2>
+            </div>
+
+            <span class="edit-count">
+                {{ steps | length }}
+            </span>
+        </div>
+
+        {% if steps %}
+            <div class="edit-card-list">
+                {% for step in steps %}
+                    <details
+                        id="step-{{ step.id }}"
+                        class="edit-card step-edit-card"
+                    >
+                        <summary class="edit-card-summary">
+                            <span>
+                                <strong>Step {{ step.step_number }}</strong>
+
+                                <small>
+                                    {{ step.instruction }}
+                                </small>
+                            </span>
+
+                            <span class="edit-card-toggle">
+                                Edit
+                            </span>
+                        </summary>
+
+                        <div class="edit-card-body">
+                            <form
+                                action="/recipes/{{ recipe.id }}/steps/{{ step.id }}/edit"
+                                method="post"
+                                class="recipe-form"
+                            >
+                                <label>
+                                    Instruction
+
+                                    <textarea
+                                        name="instruction"
+                                        rows="4"
+                                        required
+                                    >{{ step.instruction }}</textarea>
+                                </label>
+
+                                <label>
+                                    Duration in minutes
+
+                                    <input
+                                        name="duration"
+                                        type="number"
+                                        min="1"
+                                        value="{{ step.duration }}"
+                                        required
+                                    >
+                                </label>
+
+                                <label>
+                                    Step type
+
+                                    <select name="step_type" required>
+                                        {% for step_type in step_types %}
+                                            <option
+                                                value="{{ step_type.value }}"
+                                                {% if step.step_type == step_type %}
+                                                    selected
+                                                {% endif %}
+                                            >
+                                                {{ step_type.value.replace("_", " ").title() }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+
+                                <button type="submit">
+                                    Save step
+                                </button>
+                            </form>
+
+                            <div class="step-edit-footer">
+                                <div class="step-order-actions">
+                                    {% if not loop.first %}
+                                        <form
+                                            action="/recipes/{{ recipe.id }}/steps/{{ step.id }}/move-up"
+                                            method="post"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="step-order-button"
+                                                aria-label="Move step up"
+                                            >
+                                                ↑ Move up
+                                            </button>
+                                        </form>
+                                    {% endif %}
+
+                                    {% if not loop.last %}
+                                        <form
+                                            action="/recipes/{{ recipe.id }}/steps/{{ step.id }}/move-down"
+                                            method="post"
+                                        >
+                                            <button
+                                                type="submit"
+                                                class="step-order-button"
+                                                aria-label="Move step down"
+                                            >
+                                                ↓ Move down
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+
+                                <form
+                                    action="/recipes/{{ recipe.id }}/steps/{{ step.id }}/delete"
+                                    method="post"
+                                    class="delete-form"
+                                    onsubmit="return confirm('Delete this cooking step?');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="danger-button"
+                                    >
+                                        Remove step
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="empty-edit-message">
+                No cooking steps have been added yet.
+            </p>
+        {% endif %}
+
+        <details class="add-panel">
+            <summary>
+                <span>+</span>
+                Add cooking step
+            </summary>
+
+            <form
+                action="/recipes/{{ recipe.id }}/steps"
+                method="post"
+                class="recipe-form"
+            >
+                <label for="instruction">
+                    Instruction
+                </label>
+
+                <textarea
+                    id="instruction"
+                    name="instruction"
+                    rows="4"
+                    required
+                ></textarea>
+
+                <label for="duration">
+                    Duration in minutes
+                </label>
+
+                <input
+                    id="duration"
+                    name="duration"
+                    type="number"
+                    min="1"
+                    required
+                >
+
+                <label for="step_type">
+                    Step type
+                </label>
+
+                <select id="step_type" name="step_type" required>
+                    <option value="">Choose a step type</option>
+
+                    {% for step_type in step_types %}
+                        <option value="{{ step_type.value }}">
+                            {{ step_type.value.replace("_", " ").title() }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">
+                    Add cooking step
+                </button>
+            </form>
+        </details>
+    </section>
+
 </section>
 {% endblock %}

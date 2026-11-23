@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found · Cooking App{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <p class="eyebrow">404 ERROR</p>
+    <h1>We couldn't find that recipe.</h1>
+    <p>
+        The page may have been removed, moved, or never existed.
+    </p>
+
+    <a href="/recipes" class="error-page-link">
+        Back to recipes
+    </a>
+</section>
+{% endblock %}
