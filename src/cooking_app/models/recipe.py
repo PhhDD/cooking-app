@@ -2,8 +2,8 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID as UUID_Python
 
+from sqlalchemy import Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from uuid6 import uuid7
@@ -55,6 +55,15 @@ class Recipe(Base):
                                                     UUID(as_uuid=True),
                                                     ForeignKey("recipes.id", ondelete="SET NULL"),
                                                     nullable=True,
+                                                    )
+    source_url:     Mapped[str | None]  = mapped_column(
+                                                    String(500),
+                                                    nullable=True,
+                                                    )
+    is_ai_imported: Mapped[bool]        = mapped_column(
+                                                    Boolean,
+                                                    default=False,
+                                                    nullable=False,
                                                     )
     is_public:      Mapped[bool]        = mapped_column(
                                                     default=False,
