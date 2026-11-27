@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Import from YouTube · Cooking App{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <a href="/vault">← Back to vault</a>
+
+    <header class="page-heading">
+        <p class="eyebrow">AI RECIPE IMPORT</p>
+        <h1>Import from YouTube</h1>
+        <p>
+            Paste a YouTube URL and we will extract the recipe
+            into your private vault.
+        </p>
+    </header>
+
+    {% if error %}
+        <p role="alert">
+            {{ error }}
+        </p>
+    {% endif %}
+
+    <form
+        action="/recipes/import/youtube"
+        method="post"
+        class="recipe-form"
+    >
+        <label for="video_url">
+            YouTube URL
+        </label>
+
+        <input
+            id="video_url"
+            name="video_url"
+            type="url"
+            placeholder="https://www.youtube.com/watch?v=..."
+            required
+        >
+
+        <button type="submit">
+            Import recipe
+        </button>
+    </form>
+</section>
+{% endblock %}

@@ -1,5 +1,52 @@
-Cooking Web App
+# Cooking App
 
-This is a web app for cooking lovers to use that can help you organise your recipes, preparing for a shopping list, saving your favourite cooking videos or blogs and quickly convert them to a useful recipe that does not simply list steps, but rather structured to actually reflects the procedure you would normally go through when cooking. Ending the endless scrolling back and forth in the middle of cooking and make a mess everywhere
+A recipe management web app for organising recipes, saving favourites, and importing recipes from YouTube into a personal vault.
 
-This would also be a detailed learning journey for myself for AI Engineer!
+## Live Website
+
+[Open the Cooking App](https://cooking-app-2qcn.onrender.com/)
+
+## Features
+
+- Public recipe browsing
+- Private user recipe vault
+- Logto authentication
+- Recipe ingredients and preparation steps
+- Recipe copying into a user’s vault
+- YouTube recipe import
+- Gemini-powered recipe extraction
+- Import status tracking
+- Duplicate import detection
+- Failed import retry and deletion
+- PostgreSQL database with Alembic migrations
+
+## AI Workflow
+
+The current YouTube workflow is:
+
+1. The user pastes a YouTube URL.
+2. The app retrieves public video metadata.
+3. Gemini extracts a structured recipe.
+4. Pydantic validates the AI response.
+5. The recipe, ingredients, and steps are saved to the user’s private vault.
+
+Transcript extraction is being kept as a future optional adapter. The current workflow does not depend on unofficial transcript scraping.
+
+## Technology
+
+- Python
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Alembic
+- Jinja2
+- Logto
+- Gemini API
+- Render
+
+## Local Development
+
+Install dependencies:
+
+```bash
+uv sync

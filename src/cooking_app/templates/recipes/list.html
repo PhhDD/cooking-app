@@ -49,6 +49,48 @@
     </p>
 </section>
 
+{% if active_tab == "vault" and import_jobs %}
+    <section class="recent-imports">
+        <h2>Recent imports</h2>
+
+        {% for job in import_jobs %}
+	    <div class="import-row">
+            	<p>
+                	<a href="/recipes/import/youtube/{{ job.id }}">
+                    		YouTube import
+                	</a>
+
+                	—
+                	{% if job.status.value == "pending" %}
+                    		Waiting to start
+                	{% elif job.status.value == "processing" %}
+                    		Processing
+                	{% elif job.status.value == "completed" %}
+                    		Completed
+                	{% elif job.status.value == "failed" %}
+                    		Failed
+
+				<form
+				    action="/recipes/import/youtube/{{ job.id }}/delete"
+				    method="post"
+				    class="import-delete-form"
+				>
+				    <button
+					type="submit"
+					class="import-delete-button"
+					aria-label="Delete failed import"
+					title="Delete failed import"
+				    >
+				    	x
+				    </button>
+				</form>
+                	{% endif %}
+            	 </p>
+	    </div>
+        {% endfor %}
+    </section>
+{% endif %}
+
 <section class="recipe-list">
     {% if recipes %}
         {% for recipe in recipes %}
@@ -100,6 +142,10 @@
         >
             <span class="add-recipe-plus">+</span>
         </a>
+
+	<a href="/recipes/import/youtube">
+		Import from YouTube
+	</a>
     {% endif %}
 </section>
 {% endblock %}

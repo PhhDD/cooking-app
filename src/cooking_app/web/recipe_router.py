@@ -1,15 +1,25 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Form,
+    HTTPException,
+    Request,
+)
 from fastapi.responses import RedirectResponse
 from logto import LogtoClient
 from sqlalchemy import String, delete, func, or_, select
 from sqlalchemy.orm import Session
 
+from cooking_app.ai.youtube import extract_video_id
+from cooking_app.ai.youtube_import import process_youtube_import
 from cooking_app.auth import require_authenticated
 from cooking_app.models.ingredient import Ingredient, IngredientCategory
 from cooking_app.models.recipe import Recipe
+from cooking_app.models.recipe_import import RecipeImport, RecipeImportStatus
 from cooking_app.models.recipe_ingredient import RecipeIngredient
 from cooking_app.models.recipe_step import RecipeStep, StepType
 from cooking_app.models.recipe_step_dependency import RecipeStepDependency
@@ -111,11 +121,19 @@ def vault(
 
     recipes = db.scalars(statement).all()
 
+    import_jobs = db.scalars(
+        select(RecipeImport)
+        .where(RecipeImport.owner_id == current_user.id)
+        .order_by(RecipeImport.created_at.desc())
+        .limit(10)
+    ).all()
+
     return templates.TemplateResponse(
         request = request,
         name = "recipes/list.html",
         context = {
             "recipes": recipes,
+            "import_jobs": import_jobs,
             "query": "",
             "page_title": "Recipes",
             "page_description": "Your private recipes and saved public recipes.",
@@ -168,6 +186,157 @@ def create_recipe(
     return RedirectResponse(
             url = f"/recipes/{recipe.id}",
             status_code = 303
+    )
+
+
+# API route for youtube import
+@router.get("/recipes/import/youtube")
+def youtube_import_form(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+):
+    return templates.TemplateResponse(
+            request = request,
+            name = "recipes/import_youtube.html",
+            context = {"error": None},
+    )
+
+
+# API route for posting imported Youtube recipe
+@router.post("/recipes/import/youtube")
+def import_youtube(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    video_url: str = Form(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        video_id = extract_video_id(video_url)
+    except ValueError as error:
+        return templates.TemplateResponse(
+            request=request,
+            name="recipes/import_youtube.html",
+            context={"error": str(error)},
+            status_code=400,
+        )
+
+    canonical_url = (
+        f"https://www.youtube.com/watch?v={video_id}"
+    )
+
+    existing_recipe = db.scalar(
+        select(Recipe).where(
+            Recipe.owner_id == current_user.id,
+            Recipe.source_url == canonical_url,
+        )
+    )
+
+    if existing_recipe is not None:
+        return RedirectResponse(
+            url=f"/recipes/{existing_recipe.id}",
+            status_code=303,
+        )
+
+    existing_import = db.scalar(
+        select(RecipeImport)
+        .where(
+            RecipeImport.owner_id == current_user.id,
+            RecipeImport.source_url == canonical_url,
+            RecipeImport.status.in_(
+                [
+                    RecipeImportStatus.PENDING,
+                    RecipeImportStatus.PROCESSING,
+                ]
+            ),
+        )
+        .order_by(RecipeImport.created_at.desc())
+    )
+
+    if existing_import is not None:
+        return RedirectResponse(
+            url=f"/recipes/import/youtube/{existing_import.id}",
+            status_code=303,
+        )
+
+    import_job = RecipeImport(
+        owner_id=current_user.id,
+        source_url=canonical_url,
+        status=RecipeImportStatus.PENDING,
+    )
+
+    db.add(import_job)
+    db.commit()
+    db.refresh(import_job)
+
+    background_tasks.add_task(
+        process_youtube_import,
+        import_job.id,
+    )
+
+    return RedirectResponse(
+        url=f"/recipes/import/youtube/{import_job.id}",
+        status_code=303,
+    )
+
+
+# Delete failed import
+@router.post("/recipes/import/youtube/{import_id}/delete")
+def delete_failed_youtube_import(
+    import_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    import_job = db.scalar(
+        select(RecipeImport).where(
+            RecipeImport.id == import_id,
+            RecipeImport.owner_id == current_user.id,
+        )
+    )
+
+    if (
+        import_job is None
+        or import_job.status != RecipeImportStatus.FAILED
+    ):
+        raise HTTPException(
+            status_code=404,
+            detail="Failed recipe import not found",
+        )
+
+    db.delete(import_job)
+    db.commit()
+
+    return RedirectResponse(
+        url="/vault",
+        status_code=303,
+    )
+
+
+# Check the import status
+@router.get("/recipes/import/youtube/{import_id}")
+def youtube_import_status(
+    import_id: UUID,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    import_job = db.scalar(
+        select(RecipeImport).where(
+            RecipeImport.id == import_id,
+            RecipeImport.owner_id == current_user.id,
+        )
+    )
+
+    if import_job is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Recipe import not found",
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="recipes/import_status.html",
+        context={"job": import_job},
     )
 
 

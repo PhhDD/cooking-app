@@ -1282,3 +1282,51 @@ main {
         width: 100%;
     }
 }
+
+.import-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.import-row p {
+    margin: 0;
+}
+
+.import-delete-form {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0 0 0.35rem;
+    vertical-align: middle;
+}
+
+.import-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-left: 0.35rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: white;
+    background: var(--sage);
+    font-size: 0.7rem;
+    line-height: 1;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.import-delete-button:hover {
+    background: var(--terracotta);
+}
+
+.import-delete-button:focus-visible {
+    outline: 2px solid var(--light-sage);
+    outline-offset: 2px;
+}
+
+.recent-imports {
+    margin-bottom: 2rem;
+}

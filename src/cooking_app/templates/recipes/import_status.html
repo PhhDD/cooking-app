@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Importing Recipe · Cooking App{% endblock %}
+
+{% if job.status.value in ["pending", "processing"] %}
+    {% block head %}
+        <meta http-equiv="refresh" content="3">
+    {% endblock %}
+{% endif %}
+
+{% block content %}
+<section class="form-page">
+    <a href="/vault">← Back to vault</a>
+
+    <header class="page-heading">
+        <p class="eyebrow">AI RECIPE IMPORT</p>
+        <h1>Importing recipe</h1>
+    </header>
+
+    {% if job.status.value == "pending" %}
+        <p>Your import is waiting to start.</p>
+    {% elif job.status.value == "processing" %}
+        <p>
+            We are reading the YouTube information and extracting the recipe.
+            This may take a little while.
+        </p>
+    {% elif job.status.value == "completed" %}
+        <p>Your recipe was imported successfully.</p>
+
+        {% if job.recipe_id %}
+            <a href="/recipes/{{ job.recipe_id }}">
+                View recipe
+            </a>
+        {% endif %}
+    {% elif job.status.value == "failed" %}
+        <p role="alert">
+            {{ job.error_message }}
+        </p>
+
+        <a href="/recipes/import/youtube">
+            Try again
+        </a>
+    {% endif %}
+</section>
+{% endblock %}
